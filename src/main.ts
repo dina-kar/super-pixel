@@ -10,6 +10,7 @@ import Phaser from 'phaser';
 import { BootScene } from './scenes/Boot';
 import { PreloadScene } from './scenes/Preload';
 import { MainMenuScene } from './scenes/MainMenu';
+import { LevelIntroScene } from './scenes/LevelIntroScene';
 import { World1_InventoryValley } from './scenes/World1_InventoryValley';
 import { GameState } from './components/GameState';
 
@@ -61,6 +62,7 @@ const config: Phaser.Types.Core.GameConfig = {
     BootScene,
     PreloadScene,
     MainMenuScene,
+    LevelIntroScene,
     World1_InventoryValley,
   ],
 };

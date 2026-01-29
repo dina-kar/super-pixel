@@ -402,11 +402,11 @@ export class MainMenuScene extends Phaser.Scene {
     // Reset game state
     gameState.reset();
     
-    // Transition to first world
+    // Transition to level intro scene first
     this.cameras.main.fadeOut(500, 0, 0, 0);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      console.log('[MainMenuScene] Fade complete, starting World1');
-      this.scene.start('World1_InventoryValley');
+      console.log('[MainMenuScene] Fade complete, showing level intro');
+      this.scene.start('LevelIntroScene', { levelKey: 'World1_InventoryValley' });
     });
   }
 

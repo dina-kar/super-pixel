@@ -16,6 +16,7 @@
 import { BaseAdTechScene } from './BaseAdTechScene';
 import { Player } from '../entities/Player';
 import { HUD } from '../ui/HUD';
+import { AdServerGate } from '../entities/AdServerGate';
 
 /**
  * Level configuration
@@ -36,6 +37,7 @@ export class World1_InventoryValley extends BaseAdTechScene {
   private enemies!: Phaser.Physics.Arcade.Group;
   private powerups!: Phaser.Physics.Arcade.Group;
   private flagpole!: Phaser.Physics.Arcade.Sprite;
+  private adServerGates: AdServerGate[] = [];
   
   // UI
   private hud!: HUD;
@@ -72,6 +74,9 @@ export class World1_InventoryValley extends BaseAdTechScene {
     
     // Create enemies
     this.createEnemies();
+    
+    // Create ad server gates (checkpoints)
+    this.createAdServerGates();
     
     // Create goal
     this.createFlagpole();
@@ -390,6 +395,45 @@ export class World1_InventoryValley extends BaseAdTechScene {
   }
 
   /**
+   * Create Ad Server Gate checkpoints
+   */
+  private createAdServerGates(): void {
+    // First checkpoint - mid-level (First-Party Server)
+    const gate1 = new AdServerGate(this, 2000, LEVEL_CONFIG.groundHeight, {
+      requiredImpressions: 150,
+      serverType: 'first-party',
+      height: 180,
+    });
+    
+    gate1.on('gate-opened', () => {
+      this.showFloatingText(2000, LEVEL_CONFIG.groundHeight - 100, 'DATA VALIDATED!', '#00ff88');
+    });
+    
+    gate1.on('access-denied', () => {
+      this.showFloatingText(2000, LEVEL_CONFIG.groundHeight - 100, 'Need more impressions!', '#ff4444');
+    });
+    
+    this.adServerGates.push(gate1);
+    
+    // Second checkpoint - near end (Third-Party Server)
+    const gate2 = new AdServerGate(this, 3200, LEVEL_CONFIG.groundHeight, {
+      requiredImpressions: 300,
+      serverType: 'third-party',
+      height: 180,
+    });
+    
+    gate2.on('gate-opened', () => {
+      this.showFloatingText(3200, LEVEL_CONFIG.groundHeight - 100, 'SERVER SYNCED!', '#9966ff');
+    });
+    
+    gate2.on('access-denied', () => {
+      this.showFloatingText(3200, LEVEL_CONFIG.groundHeight - 100, 'Collect more data!', '#ff4444');
+    });
+    
+    this.adServerGates.push(gate2);
+  }
+
+  /**
    * Create flagpole (conversion goal)
    */
   private createFlagpole(): void {
@@ -490,6 +534,41 @@ export class World1_InventoryValley extends BaseAdTechScene {
       undefined, 
       this
     );
+    
+    // Player vs AdServer Gates
+    this.adServerGates.forEach(gate => {
+      this.physics.add.collider(
+        this.player,
+        gate.getBarrier(),
+        () => this.handleGateCollision(gate),
+        undefined,
+        this
+      );
+    });
+  }
+
+  /**
+   * Handle collision with AdServer Gate
+   */
+  private handleGateCollision(gate: AdServerGate): void {
+    if (gate.getIsOpen()) return;
+    
+    // Get current impressions from player inventory
+    const currentImpressions = this.player.getImpressionCount();
+    
+    // Try to validate and open gate
+    const canPass = gate.validate(currentImpressions);
+    
+    if (!canPass) {
+      // Provide feedback about what's needed
+      const required = gate.getRequiredImpressions();
+      const remaining = required - currentImpressions;
+      
+      if (remaining > 0) {
+        // Only show denial message occasionally
+        gate.denyAccess();
+      }
+    }
   }
 
   /**

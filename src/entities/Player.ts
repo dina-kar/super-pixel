@@ -27,7 +27,7 @@ const PLAYER_CONFIG = {
   maxSpeed: 300,
   acceleration: 1200,
   drag: 800,
-  jumpVelocity: -500,
+  jumpVelocity: -650,
   
   // Sizes per format
   sizes: {
@@ -456,6 +456,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    */
   getInventory(): InventoryState {
     return { ...this.inventory };
+  }
+
+  /**
+   * Get total impression count (for gate validation)
+   */
+  getImpressionCount(): number {
+    return this.inventory.totalValue;
   }
 
   /**
