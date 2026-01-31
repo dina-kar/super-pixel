@@ -9,9 +9,21 @@
 import Phaser from 'phaser';
 import { BootScene } from './scenes/Boot';
 import { PreloadScene } from './scenes/Preload';
+import { StoryIntroScene } from './scenes/StoryIntroScene';
 import { MainMenuScene } from './scenes/MainMenu';
+import { SettingsScene } from './scenes/SettingsScene';
+import { AdTechTutorialScene } from './scenes/AdTechTutorialScene';
 import { LevelIntroScene } from './scenes/LevelIntroScene';
 import { World1_InventoryValley } from './scenes/World1_InventoryValley';
+import { World2_TechStack } from './scenes/World2_TechStack';
+import { World3_NativeNinja } from './scenes/World3_NativeNinja';
+import { World3_VideoVolcano } from './scenes/World3_VideoVolcano';
+import { World3_AudioAlps } from './scenes/World3_AudioAlps';
+import { World3_RichMediaRainbow } from './scenes/World3_RichMediaRainbow';
+import { World4_AuctionArena } from './scenes/World4_AuctionArena';
+import { World5_PrivacyCitadel } from './scenes/World5_PrivacyCitadel';
+import { World6_AttributionCastle } from './scenes/World6_AttributionCastle';
+import { FinalWorld_WalledGarden } from './scenes/FinalWorld_WalledGarden';
 import { GameState } from './components/GameState';
 
 // Initialize global game state singleton
@@ -61,9 +73,21 @@ const config: Phaser.Types.Core.GameConfig = {
   scene: [
     BootScene,
     PreloadScene,
+    StoryIntroScene,
     MainMenuScene,
+    SettingsScene,
+    AdTechTutorialScene,
     LevelIntroScene,
     World1_InventoryValley,
+    World2_TechStack,
+    World3_NativeNinja,
+    World3_VideoVolcano,
+    World3_AudioAlps,
+    World3_RichMediaRainbow,
+    World4_AuctionArena,
+    World5_PrivacyCitadel,
+    World6_AttributionCastle,
+    FinalWorld_WalledGarden,
   ],
 };
 

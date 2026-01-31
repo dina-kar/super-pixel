@@ -402,11 +402,14 @@ export class MainMenuScene extends Phaser.Scene {
     // Reset game state
     gameState.reset();
     
-    // Transition to level intro scene first
+    // Clear any existing HUD
+    this.clearUILayer();
+    
+    // Transition to tutorial first (then level intro)
     this.cameras.main.fadeOut(500, 0, 0, 0);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      console.log('[MainMenuScene] Fade complete, showing level intro');
-      this.scene.start('LevelIntroScene', { levelKey: 'World1_InventoryValley' });
+      console.log('[MainMenuScene] Fade complete, showing AdTech tutorial');
+      this.scene.start('AdTechTutorialScene', { levelKey: 'World1_InventoryValley' });
     });
   }
 
@@ -416,15 +419,42 @@ export class MainMenuScene extends Phaser.Scene {
   private continueGame(): void {
     const savedProgress = gameState.getState().savedProgress;
     
-    if (savedProgress.worldIndex > 0) {
-      console.log('[MainMenuScene] Continuing from saved progress');
-      // TODO: Load appropriate scene based on saved progress
-      this.startNewGame();
+    if (savedProgress.worldIndex > 0 || savedProgress.timestamp > 0) {
+      console.log('[MainMenuScene] Continuing from saved progress', savedProgress);
+      
+      // Clear any existing HUD
+      this.clearUILayer();
+      
+      // Determine which level to load based on saved progress
+      const levelKeys = [
+        'World1_InventoryValley',
+        'World2_TechStack',
+        'World3_NativeNinja',
+        'World3_VideoVolcano',
+        'World3_AudioAlps',
+        'World3_RichMediaRainbow',
+        'World4_AuctionArena',
+        'World5_PrivacyCitadel',
+        'World6_AttributionCastle',
+        'FinalWorld_WalledGarden',
+      ];
+      
+      const levelKey = levelKeys[savedProgress.worldIndex] || 'World1_InventoryValley';
+      
+      this.cameras.main.fadeOut(500, 0, 0, 0);
+      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+        // Go to tutorial for the continued world
+        this.scene.start('AdTechTutorialScene', { levelKey });
+      });
     } else {
       console.log('[MainMenuScene] No saved progress found');
       // Show notification
-      this.showNotification('No saved campaign found!');
-      this.canSelect = true;
+      this.showNotification('No saved campaign found! Starting new game...');
+      
+      // Start new game after delay
+      this.time.delayedCall(1500, () => {
+        this.startNewGame();
+      });
     }
   }
 
@@ -433,9 +463,11 @@ export class MainMenuScene extends Phaser.Scene {
    */
   private openSettings(): void {
     console.log('[MainMenuScene] Opening settings');
-    // TODO: Implement settings scene
-    this.showNotification('Settings coming soon!');
-    this.canSelect = true;
+    
+    this.cameras.main.fadeOut(300, 0, 0, 0);
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.start('SettingsScene');
+    });
   }
 
   /**
@@ -446,6 +478,16 @@ export class MainMenuScene extends Phaser.Scene {
     // TODO: Implement credits scene
     this.showNotification('Credits coming soon!');
     this.canSelect = true;
+  }
+
+  /**
+   * Clear the UI layer to prevent HUD bleed-through
+   */
+  private clearUILayer(): void {
+    const uiLayer = document.getElementById('ui-layer');
+    if (uiLayer) {
+      uiLayer.innerHTML = '';
+    }
   }
 
   /**

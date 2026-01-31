@@ -15,6 +15,15 @@ import { ViewabilityEngine } from '../components/ViewabilityEngine';
 import type { PricingModel } from '../types/adtech';
 
 /**
+ * World info for HUD display
+ */
+interface WorldInfo {
+  worldNumber: number;
+  worldName: string;
+  color: string;
+}
+
+/**
  * HUD Class
  * Creates and manages the HTML overlay for game UI
  */
@@ -22,6 +31,7 @@ export class HUD {
   private scene: Phaser.Scene;
   private budgetManager: BudgetManager;
   private viewabilityEngine: ViewabilityEngine;
+  private worldInfo: WorldInfo;
   
   // DOM Elements
   private container: HTMLElement | null = null;
@@ -35,16 +45,18 @@ export class HUD {
   constructor(
     scene: Phaser.Scene,
     budgetManager: BudgetManager,
-    viewabilityEngine: ViewabilityEngine
+    viewabilityEngine: ViewabilityEngine,
+    worldInfo?: WorldInfo
   ) {
     this.scene = scene;
     this.budgetManager = budgetManager;
     this.viewabilityEngine = viewabilityEngine;
+    this.worldInfo = worldInfo || { worldNumber: 1, worldName: 'Inventory Valley', color: '#00ff88' };
     
     this.createHUD();
     this.setupEventListeners();
     
-    console.log('[HUD] Created');
+    console.log('[HUD] Created for', this.worldInfo.worldName);
   }
 
   /**
@@ -94,8 +106,8 @@ export class HUD {
       
       <!-- World Indicator -->
       <div class="hud-panel world-panel" style="padding: 8px 16px;">
-        <div class="hud-label" style="margin-bottom: 0;">World 1</div>
-        <div style="font-size: 10px; color: #00ff88;">Inventory Valley</div>
+        <div class="hud-label" style="margin-bottom: 0;">World ${this.worldInfo.worldNumber}</div>
+        <div style="font-size: 10px; color: ${this.worldInfo.color};">${this.worldInfo.worldName}</div>
       </div>
     `;
     
@@ -326,21 +338,33 @@ export class HUD {
    * Clean up HUD
    */
   destroy(): void {
+    // Remove container
     if (this.container) {
       this.container.remove();
       this.container = null;
     }
     
+    // Remove debug panel
     if (this.debugPanel) {
       this.debugPanel.remove();
       this.debugPanel = null;
     }
     
+    // Clear all pricing buttons
     this.pricingButtons.clear();
     
-    // Remove event listeners
-    this.budgetManager.removeAllListeners();
+    // Clear all element references
+    this.budgetValueEl = null;
+    this.budgetFillEl = null;
+    this.impressionsEl = null;
+    this.viewabilityEl = null;
     
-    console.log('[HUD] Destroyed');
+    // Clear the entire UI layer to ensure no HUD remnants
+    const uiLayer = document.getElementById('ui-layer');
+    if (uiLayer) {
+      uiLayer.innerHTML = '';
+    }
+    
+    console.log('[HUD] Destroyed and UI layer cleared');
   }
 }

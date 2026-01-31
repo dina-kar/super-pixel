@@ -88,13 +88,22 @@ export class World1_InventoryValley extends BaseAdTechScene {
     this.setupCamera();
     
     // Create HUD
-    this.hud = new HUD(this, this.budgetSystem, this.viewabilityTracker);
+    this.hud = new HUD(this, this.budgetSystem, this.viewabilityTracker, {
+      worldNumber: 1,
+      worldName: 'Inventory Valley',
+      color: '#00ff88'
+    });
     
     // Set up collisions
     this.setupCollisions();
     
     // Fade in
     this.cameras.main.fadeIn(500);
+    
+    // Show controls hint for first-time players
+    this.time.delayedCall(1000, () => {
+      this.showControlsHint(6000);
+    });
     
     console.log('[World1] Scene created');
   }
@@ -816,40 +825,75 @@ export class World1_InventoryValley extends BaseAdTechScene {
     stats.setOrigin(0.5);
     stats.setScrollFactor(0);
     
-    // Continue prompt
+    // Auto-continue countdown
+    let countdown = 5;
     const promptStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       fontFamily: '"Courier New", monospace',
       fontSize: '14px',
-      color: '#666666',
+      color: '#00ff88',
     };
     
     const prompt = this.add.text(
       this.cameras.main.scrollX + 640,
       550,
-      'Press ENTER to continue',
+      `Continuing in ${countdown}...`,
       promptStyle
     );
     prompt.setOrigin(0.5);
     prompt.setScrollFactor(0);
     
-    // Blink prompt
-    this.tweens.add({
-      targets: prompt,
-      alpha: { from: 1, to: 0.3 },
-      duration: 500,
-      yoyo: true,
-      repeat: -1,
+    // Skip hint
+    const skipHint = this.add.text(
+      this.cameras.main.scrollX + 640,
+      580,
+      'Press SPACE or ENTER to continue now',
+      { ...promptStyle, fontSize: '11px', color: '#666666' }
+    );
+    skipHint.setOrigin(0.5);
+    skipHint.setScrollFactor(0);
+    
+    // Countdown timer
+    const countdownTimer = this.time.addEvent({
+      delay: 1000,
+      repeat: 4,
+      callback: () => {
+        countdown--;
+        prompt.setText(`Continuing in ${countdown}...`);
+        if (countdown <= 0) {
+          this.transitionToNextLevel();
+        }
+      },
     });
     
-    // Listen for continue
+    // Allow early skip with SPACE or ENTER
     if (this.input.keyboard) {
-      this.input.keyboard.once('keydown-ENTER', () => {
-        this.cameras.main.fadeOut(500);
-        this.cameras.main.once('camerafadeoutcomplete', () => {
-          this.scene.start('MainMenuScene');
-        });
-      });
+      const skipHandler = () => {
+        countdownTimer.destroy();
+        this.transitionToNextLevel();
+      };
+      this.input.keyboard.once('keydown-ENTER', skipHandler);
+      this.input.keyboard.once('keydown-SPACE', skipHandler);
     }
+  }
+
+  /**
+   * Transition to the next level
+   */
+  private transitionToNextLevel(): void {
+    // Save progress
+    import('../main').then(({ gameState }) => {
+      gameState.setCurrentWorld(1); // World 2 index
+      gameState.save();
+    });
+    
+    // Clear HUD before transitioning
+    this.hud?.destroy();
+    
+    this.cameras.main.fadeOut(500);
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      // Go through tutorial for the next world
+      this.scene.start('AdTechTutorialScene', { levelKey: 'World2_TechStack' });
+    });
   }
 
   /**

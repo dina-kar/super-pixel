@@ -254,7 +254,8 @@ export class PreloadScene extends Phaser.Scene {
     // Short delay before transitioning
     this.time.delayedCall(300, () => {
       this.hideLoadingScreen();
-      this.scene.start('MainMenuScene');
+      // Start with the epic story intro
+      this.scene.start('StoryIntroScene');
     });
   }
 

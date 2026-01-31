@@ -103,6 +103,97 @@ export interface AuctionResult {
 }
 
 // ============================================================================
+// SSP (SUPPLY-SIDE PLATFORM) TYPES
+// ============================================================================
+
+export interface FloorPriceConfig {
+  basePrice: number;
+  minPrice: number;
+  maxPrice: number;
+  volatility: number;
+}
+
+export interface FloorPriceEvent {
+  price: number;
+  demand: number;
+  competition: number;
+  timestamp: number;
+}
+
+export interface GhostBidderData {
+  id: string;
+  name: string;
+  currentBid: number;
+  maxBid: number;
+  aggression: number;
+}
+
+// ============================================================================
+// DSP (DEMAND-SIDE PLATFORM) TYPES
+// ============================================================================
+
+export interface BidRequestData {
+  id: string;
+  inventoryId: string;
+  floorPrice: number;
+  timestamp: number;
+  userData: UserSignals;
+  contextData: ContextSignals;
+}
+
+export interface UserSignals {
+  deviceType: 'mobile' | 'desktop' | 'tablet' | 'ctv';
+  geo: string;
+  segments: string[];
+  frequency: number;
+}
+
+export interface ContextSignals {
+  domain: string;
+  category: string;
+  viewability: number;
+  adPosition: 'above-fold' | 'below-fold';
+}
+
+export interface BidResponseData {
+  requestId: string;
+  bidAmount: number;
+  didBid: boolean;
+  timestamp: number;
+  responseTime: number;
+}
+
+export interface BidShadingData {
+  suggestedBid: number;
+  confidence: number;
+  rationale: string;
+  riskLevel: 'low' | 'medium' | 'high';
+}
+
+// ============================================================================
+// DMP (DATA MANAGEMENT PLATFORM) TYPES
+// ============================================================================
+
+export type DataPartyType = 'first-party' | 'third-party';
+
+export interface DataCoinConfig {
+  type: DataPartyType;
+  dataType: DataType;
+  value: number;
+  label: string;
+  expiresAtLevel?: number;
+}
+
+export interface AudienceSegmentData {
+  id: string;
+  name: string;
+  category: DataType;
+  requiredPoints: number;
+  isUnlocked: boolean;
+  description: string;
+}
+
+// ============================================================================
 // ATTRIBUTION TRACKING
 // ============================================================================
 

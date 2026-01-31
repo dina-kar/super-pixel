@@ -254,6 +254,66 @@ export abstract class BaseAdTechScene extends Phaser.Scene {
     // Will be implemented with tooltip system
     console.log(`[Tooltip] ${title}: ${content}`);
   }
+  
+  /**
+   * Show controls hint for new players
+   */
+  protected showControlsHint(duration: number = 5000): void {
+    // Check if player has seen controls before
+    const hasSeenControls = localStorage.getItem('adtech-controls-seen');
+    if (hasSeenControls) return;
+    
+    // Create controls hint overlay
+    const hint = this.add.container(this.cameras.main.centerX, this.cameras.main.height - 100);
+    hint.setScrollFactor(0);
+    hint.setDepth(5000);
+    hint.setAlpha(0);
+    
+    // Background
+    const bg = this.add.graphics();
+    bg.fillStyle(0x000000, 0.85);
+    bg.fillRoundedRect(-200, -40, 400, 80, 12);
+    bg.lineStyle(2, 0x00ff88, 0.6);
+    bg.strokeRoundedRect(-200, -40, 400, 80, 12);
+    hint.add(bg);
+    
+    // Controls text
+    const controlsText = this.add.text(0, -15, '← → MOVE    ↑ or SPACE JUMP', {
+      fontFamily: '"Press Start 2P", monospace',
+      fontSize: '10px',
+      color: '#00ff88',
+    }).setOrigin(0.5);
+    hint.add(controlsText);
+    
+    const subText = this.add.text(0, 15, 'Press F1 for debug mode', {
+      fontFamily: '"Courier New", monospace',
+      fontSize: '10px',
+      color: '#666666',
+    }).setOrigin(0.5);
+    hint.add(subText);
+    
+    // Fade in
+    this.tweens.add({
+      targets: hint,
+      alpha: 1,
+      duration: 500,
+      ease: 'Power2',
+    });
+    
+    // Fade out after duration
+    this.time.delayedCall(duration, () => {
+      this.tweens.add({
+        targets: hint,
+        alpha: 0,
+        duration: 500,
+        ease: 'Power2',
+        onComplete: () => hint.destroy(),
+      });
+      
+      // Mark as seen
+      localStorage.setItem('adtech-controls-seen', 'true');
+    });
+  }
 
   // ============================================================================
   // CLEANUP
@@ -273,6 +333,12 @@ export abstract class BaseAdTechScene extends Phaser.Scene {
     // Remove debug key listener
     if (this.debugKey) {
       this.debugKey.off('down', this.toggleDebugMode, this);
+    }
+    
+    // Clear the UI layer to prevent HUD bleed-through
+    const uiLayer = document.getElementById('ui-layer');
+    if (uiLayer) {
+      uiLayer.innerHTML = '';
     }
   }
 }

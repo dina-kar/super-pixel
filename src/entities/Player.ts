@@ -27,7 +27,7 @@ const PLAYER_CONFIG = {
   maxSpeed: 300,
   acceleration: 1200,
   drag: 800,
-  jumpVelocity: -650,
+  jumpVelocity: -800,
   
   // Sizes per format
   sizes: {

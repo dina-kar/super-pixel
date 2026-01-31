@@ -61,6 +61,143 @@ const LEVEL_INTROS: Record<string, LevelIntroConfig> = {
     ],
     accentColor: 0x00ff88,
   },
+  'World2_TechStack': {
+    levelKey: 'World2_TechStack',
+    levelName: 'TECH STACK TOWERS',
+    worldNumber: 2,
+    story: [
+      'You climb the Tech Stack Towers, where every floor',
+      'is a new layer of the ad auction machine.',
+      '',
+      'The SSP sets the floor price. The DSP decides',
+      'whether you bid or pass in milliseconds.',
+      '',
+      'Meanwhile, the DMP collects the data trail you leave',
+      'behind. The higher you climb, the better the segment.',
+      '',
+      'Precision, timing, and data will decide if you reach',
+      'the summit before the budget collapses.',
+    ],
+    objectives: [
+      '• Jump above floor price lines to win valid bids',
+      '• Respond to bid requests quickly (UP to bid, DOWN to pass)',
+      '• Collect data coins to unlock audience segments',
+      '• Reach the top of the tower to complete the level',
+    ],
+    tips: [
+      'TIP: Floor price barriers move—watch their rhythm',
+      'TIP: Passing a bad bid can save your budget',
+      'TIP: Data coins stack power for later worlds',
+    ],
+    accentColor: 0x66ccff,
+  },
+  'World3_NativeNinja': {
+    levelKey: 'World3_NativeNinja',
+    levelName: 'NATIVE NINJA',
+    worldNumber: 3,
+    story: [
+      'Welcome to the editorial maze, where ads must blend',
+      'without breaking the rules.',
+      '',
+      'Match the environment and move like content,',
+      'but never forget the disclosure badge.',
+      '',
+      'If transparency fades, the campaign collapses.',
+      'Balance stealth with trust to pass unseen.',
+    ],
+    objectives: [
+      '• Blend into editorial zones by matching colors',
+      '• Keep the disclosure meter above the minimum line',
+      '• Avoid drawing attention in high-risk zones',
+      '• Reach the exit to complete the level',
+    ],
+    tips: [
+      'TIP: Move slowly to maintain blend power',
+      'TIP: Disclosure regenerates when you back off',
+      'TIP: The safest route is not always the fastest',
+    ],
+    accentColor: 0xffb24d,
+  },
+  'World3_VideoVolcano': {
+    levelKey: 'World3_VideoVolcano',
+    levelName: 'VIDEO VOLCANO',
+    worldNumber: 3,
+    story: [
+      'The volcano streams nonstop. Pre-roll, mid-roll,',
+      'post-roll—the heat never lets up.',
+      '',
+      'Buffer zones will stall your progress, and the skip',
+      'button tempts you at every turn.',
+      '',
+      'Hold steady, survive the heat, and deliver a full',
+      'view to complete the campaign.',
+    ],
+    objectives: [
+      '• Survive each ad break sequence (pre, mid, post)',
+      '• Manage buffering zones without falling',
+      '• Decide when to skip or wait for full rewards',
+      '• Reach the eruption gate to complete the level',
+    ],
+    tips: [
+      'TIP: Waiting through the full ad grants bonus rewards',
+      'TIP: Skipping early can save time but lowers VCR',
+      'TIP: Buffer zones are safe—use them to plan jumps',
+    ],
+    accentColor: 0xff6a4d,
+  },
+  'World3_AudioAlps': {
+    levelKey: 'World3_AudioAlps',
+    levelName: 'AUDIO ALPS',
+    worldNumber: 3,
+    story: [
+      'In the Audio Alps, the path itself is rhythm.',
+      'Platforms pulse to the beat, vanishing between bars.',
+      '',
+      'Companion banners appear in sync, guiding your climb',
+      'through the echoing valleys.',
+      '',
+      'Find the tempo and ride the resonance to the peak.',
+    ],
+    objectives: [
+      '• Time jumps to rhythm platforms on the beat',
+      '• Use companion banners to cross gaps safely',
+      '• Follow BPM changes through each segment',
+      '• Reach the summit gate to complete the level',
+    ],
+    tips: [
+      'TIP: Watch the beat indicator for perfect timing',
+      'TIP: Faster BPM means shorter platform windows',
+      'TIP: Missed beats reset—stay patient and sync up',
+    ],
+    accentColor: 0x88aaff,
+  },
+  'World3_RichMediaRainbow': {
+    levelKey: 'World3_RichMediaRainbow',
+    levelName: 'RICH MEDIA RAINBOW',
+    worldNumber: 3,
+    story: [
+      'The rainbow is alive with motion and interaction.',
+      'Every platform expands with engagement.',
+      '',
+      'Mini-games and interstitials block the path until',
+      'you earn the audience’s attention.',
+      '',
+      'Build engagement, expand the format, and finish the',
+      'final showcase of the Multimedia Mediums.',
+    ],
+    objectives: [
+      '• Trigger expandable platforms to open new paths',
+      '• Complete interstitial mini-games to advance',
+      '• Keep engagement value high to avoid shrinkage',
+      '• Reach the rainbow gate to complete the world',
+    ],
+    tips: [
+      'TIP: Stay close to expansion zones to keep them open',
+      'TIP: Mini-games reset if you fall—plan your approach',
+      'TIP: Engagement peaks when you keep moving',
+    ],
+    accentColor: 0xff66cc,
+  },
 };
 
 export class LevelIntroScene extends Phaser.Scene {
@@ -594,6 +731,36 @@ export class LevelIntroScene extends Phaser.Scene {
   private showContinuePrompt(): void {
     this.canContinue = true;
     
+    // Add auto-continue countdown
+    let countdown = 8;
+    
+    const countdownText = this.add.text(
+      this.cameras.main.width / 2,
+      this.cameras.main.height - 90,
+      `Auto-starting in ${countdown}...`,
+      {
+        fontFamily: '"Courier New", monospace',
+        fontSize: '11px',
+        color: '#666666',
+      }
+    );
+    countdownText.setOrigin(0.5);
+    
+    const countdownTimer = this.time.addEvent({
+      delay: 1000,
+      repeat: 7,
+      callback: () => {
+        countdown--;
+        countdownText.setText(`Auto-starting in ${countdown}...`);
+        if (countdown <= 0) {
+          this.startLevel();
+        }
+      },
+    });
+    
+    // Store timer reference for cleanup
+    this.data.set('countdownTimer', countdownTimer);
+    
     this.tweens.add({
       targets: this.continuePrompt,
       alpha: 1,
@@ -611,7 +778,14 @@ export class LevelIntroScene extends Phaser.Scene {
    * Start the actual level
    */
   private startLevel(): void {
+    if (!this.canContinue) return;
     this.canContinue = false;
+    
+    // Cancel countdown timer if exists
+    const countdownTimer = this.data.get('countdownTimer') as Phaser.Time.TimerEvent;
+    if (countdownTimer) {
+      countdownTimer.destroy();
+    }
     
     // Epic transition
     this.cameras.main.flash(300, 0, 255, 136);
