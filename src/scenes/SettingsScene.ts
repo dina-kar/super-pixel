@@ -73,7 +73,7 @@ export class SettingsScene extends Phaser.Scene {
     }
   }
 
-  private createSettings(width: number, height: number): void {
+  private createSettings(width: number, _height: number): void {
     const settings: SettingOption[] = [
       {
         key: 'volume',
